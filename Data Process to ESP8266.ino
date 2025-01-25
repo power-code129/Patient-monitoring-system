@@ -15,8 +15,8 @@ const char* ssid = "Airtel_arok_3180";
 const char* password = "0723192827";
 
 // OpenWeatherMap API details for AQI
-const char* aqiApiKey = "0c728c09a543e1a42984f1e9a73d53d3"; // Get your API key from OpenWeatherMap
-const char* aqiApiUrl = "http://api.openweathermap.org/data/2.5/air_pollution?lat=11.040825711135978&lon=77.00228451015636&appid=0c728c09a543e1a42984f1e9a73d53d3";
+const char* aqiApiKey = "04c26ec839056f48a9d27ce6fd5fb318e581e08d"; // Get your API key from OpenWeatherMap
+const char* aqiApiUrl = "https://api.waqi.info/feed/geo:11.040825711135978;77.00228451015636/?token=04c26ec839056f48a9d27ce6fd5fb318e581e08d";
 
 // OpenStreetMap Nominatim API for nearby medical shops (No API key required)
 const char* nearbyApiUrl = "https://nominatim.openstreetmap.org/search?format=json&limit=5&q=pharmacy+near+11.040825711135978,77.00228451015636";
