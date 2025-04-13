@@ -1,0 +1,86 @@
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPL3qrLlSe1l"
+#define BLYNK_TEMPLATE_NAME "IOT BASED PATIENT MONITORING SYSTEM"
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+#include <SoftwareSerial.h>
+
+// Replace with your Blynk credentials
+char auth[] = "o26sTFhM68WhHOGGKhxyrmxHrT47ssKa"; 
+char ssid[] = "";  
+char pass[] = "";  
+
+// Software Serial for Arduino communication
+#define RX_PIN D5  // Use D5 instead of D7
+#define TX_PIN D6  // Use D6 instead of D8
+SoftwareSerial ArduinoSerial(RX_PIN, TX_PIN); // RX, TX
+
+// Blynk Virtual Pins
+#define VPIN_TEMP V0
+#define VPIN_PULSE V1
+#define VPIN_BP V2
+
+BlynkTimer timer;
+
+bool validateData(String data);
+String getValue(String data, char separator, int index);
+
+void setup() {
+  Serial.begin(115200);
+  ArduinoSerial.begin(9600);
+  
+  WiFi.begin(ssid, pass);  // Use 'pass' instead of 'password'
+  Blynk.begin(auth, ssid, pass);  // Use 'auth' and 'pass'
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi Connected!");
+  Serial.println("Setup Complete. NodeMCU Ready!");
+}
+
+void loop() {
+  Blynk.run();
+
+  if (ArduinoSerial.available()) {
+    String sensorData = ArduinoSerial.readStringUntil('\n');
+    sensorData.trim();
+    if (validateData(sensorData)) {
+      String temperature = getValue(sensorData, ',', 0);
+      String pulseRate = getValue(sensorData, ',', 1);
+      String bpValues = getValue(sensorData, ',', 2);
+
+      Serial.println("Temperature: " + temperature + "°C");
+      Serial.println("Pulse Rate: " + pulseRate + " BPM");
+      Serial.println("Blood Pressure: " + bpValues);
+
+      Blynk.virtualWrite(VPIN_TEMP, temperature.toFloat());
+      Blynk.virtualWrite(VPIN_PULSE, pulseRate.toInt());
+      Blynk.virtualWrite(VPIN_BP, bpValues);
+    }
+  }
+}
+
+// Function to validate sensor data
+bool validateData(String data) {
+  int count = 0;
+  for (uint i = 0; i < data.length(); i++) {
+    if (data[i] == ',') count++;
+  }
+  return (count == 2);
+}
+
+// Function to retrieve values from CSV
+String getValue(String data, char separator, int index) {
+  int found = 0;
+  int strIndex[] = { 0, -1 };
+  for (uint i = 0; i <= data.length() && found <= index; i++) {
+    if (data.charAt(i) == separator || i == data.length()) {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = i;
+    }
+  }
+  return (found > index) ? data.substring(strIndex[0], strIndex[1]) : "";
+}
